@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { chatSession } from '@/utils/GeminiAIModal'
+
 import { LoaderCircle } from 'lucide-react'
 import { db } from '@/utils/db'
 import { MockInterview } from '@/utils/schema'
@@ -36,10 +36,31 @@ function AddNewInterview() {
 
         const InputPrompt="Job position: "+jobPosition+", Job Description: "+jobDesc+", Years of Experience : "+jobExperience+" , Depends on Job Position, Job Description & Years of Experience give us "+process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT+" Interview question along with Answer in JSON format, Give us question and answer field on JSON"
 
-        const result=await chatSession.sendMessage(InputPrompt);
-        const MockJsonResp = (await result.response.text())
-        .replace('```json', '') // Remove opening JSON code fence
-        .replace('```', '') // Remove closing code fence
+        // const result=await chatSession.sendMessage(InputPrompt);
+        // const MockJsonResp = (await result.response.text())
+        // .replace('```json', '') // Remove opening JSON code fence
+        // .replace('```', '') // Remove closing code fence
+        const response = await fetch('/api/generate-questions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    jobPosition,
+    jobDesc,
+    jobExperience,
+  }),
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+  throw new Error(data.error || 'Failed to generate questions');
+}
+
+const MockJsonResp = JSON.stringify(data.questions);
+
+setJsonResponse(MockJsonResp);
              console.log(JSON.parse(MockJsonResp));
         setJsonResponse(MockJsonResp);
 
@@ -77,48 +98,49 @@ function AddNewInterview() {
          >
             <h2 className='text-lg text-center'>+ Add New</h2>
         </div>
-        <Dialog open={openDailog}>
+        <Dialog open={openDailog} onOpenChange={setOpenDailog}>
        
         <DialogContent className="max-w-2xl">
             <DialogHeader >
             <DialogTitle className="text-2xl" >Tell us more about your job interviwing</DialogTitle>
-            <DialogDescription>
-                <form onSubmit={onSubmit}>
+            <DialogDescription asChild>
                 <div>
-                   
-                    <h2>Add Details about yout job position/role, Job description and years of experience</h2>
+                    <form onSubmit={onSubmit}>
+                        <div>
+                            <h2>Add Details about yout job position/role, Job description and years of experience</h2>
 
-                    <div className='mt-7 my-3'>
-                        <label>Job Role/Job Position</label>
-                        <Input placeholder="Ex. Full Stack Developer" required
-                        onChange={(event)=>setJobPosition(event.target.value)}
-                        />
-                    </div>
-                    <div className=' my-3'>
-                        <label>Job Description/ Tech Stack (In Short)</label>
-                        <Textarea placeholder="Ex. React, Angular, NodeJs, MySql etc" 
-                        required
-                        onChange={(event)=>setJobDesc(event.target.value)} />
-                    </div>
-                    <div className=' my-3'>
-                        <label>Years of experience</label>
-                        <Input placeholder="Ex.5"  type="number"  max="100" 
-                        required
-                        onChange={(event)=>setJobExperience(event.target.value)}
-                        />
-                    </div>
+                            <div className='mt-7 my-3'>
+                                <label>Job Role/Job Position</label>
+                                <Input placeholder="Ex. Full Stack Developer" required
+                                onChange={(event)=>setJobPosition(event.target.value)}
+                                />
+                            </div>
+                            <div className=' my-3'>
+                                <label>Job Description/ Tech Stack (In Short)</label>
+                                <Textarea placeholder="Ex. React, Angular, NodeJs, MySql etc" 
+                                required
+                                onChange={(event)=>setJobDesc(event.target.value)} />
+                            </div>
+                            <div className=' my-3'>
+                                <label>Years of experience</label>
+                                <Input placeholder="Ex.5"  type="number"  max="100" 
+                                required
+                                onChange={(event)=>setJobExperience(event.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className='flex gap-5 justify-end'>
+                            <Button type="button" variant="ghost" onClick={()=>setOpenDailog(false)}>Cancel</Button>
+                            <Button type="submit" disabled={loading} >
+                                {loading ? 
+                                <>
+                                <LoaderCircle className='animate-spin' /> Generating from AI
+                                </> : 'Start Interview'    
+                            }
+                                </Button>
+                        </div>
+                    </form>
                 </div>
-                <div className='flex gap-5 justify-end'>
-                    <Button type="button" variant="ghost" onClick={()=>setOpenDailog(false)}>Cancel</Button>
-                    <Button type="submit" disabled={loading} >
-                        {loading? 
-                        <>
-                        <LoaderCircle className='animate-spin' /> Generating from AI
-                        </>:'Start Interview'    
-                    }
-                        </Button>
-                </div>
-                </form>
             </DialogDescription>
             </DialogHeader>
         </DialogContent>

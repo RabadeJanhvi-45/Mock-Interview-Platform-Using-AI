@@ -30,15 +30,14 @@ function InterviewList() {
         <h2 className='font-medium text-xl'>Previous Mock Interview</h2>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-3'>
-            {interviewList?.length>0?interviewList.map((interview,index)=>(
-                <InterviewItemCard 
-                interview={interview}
-                key={index} />
-            ))
-            :
-            [1,2,3,4].map((item,index)=>(
-                <div className='h-[100px] w-full bg-gray-200 animate-pulse rounded-lg '>
-                </div>
+            {interviewList?.length>0 ? interviewList.map((interview) => (
+                <InterviewItemCard
+                    key={interview.mockId || `${interview.createdAt}-${interview.jobPosition}`}
+                    interview={interview}
+                />
+            )) :
+            [1,2,3,4].map((item) => (
+                <div key={`skeleton-${item}`} className='h-[100px] w-full bg-gray-200 animate-pulse rounded-lg ' />
             ))
         }
         </div>

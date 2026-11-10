@@ -25,7 +25,7 @@ function Header() {
             >Dashboard</li>
             </Link>
             
-            <li className={`hover:text-primary hover:font-bold transition-all
+            {/* <li className={`hover:text-primary hover:font-bold transition-all
             cursor-pointer
             ${path=='/dashboard/questions'&&'text-primary font-bold'}
             `}>Questions</li>
@@ -38,7 +38,7 @@ function Header() {
             <li className={`hover:text-primary hover:font-bold transition-all
             cursor-pointer
             ${path=='/dashboard/how'&&'text-primary font-bold'}
-            `}>How it Works?</li>
+            `}>How it Works?</li> */}
         </ul>
         <UserButton/>
     </div>
